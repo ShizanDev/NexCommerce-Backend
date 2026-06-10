@@ -131,6 +131,31 @@ app.post("/login", (req, res) => {
   );
 });
 
+// ✅ Forgot Password (Simple Reset)
+app.post("/forgot-password", (req, res) => {
+  const { email, newPassword } = req.body;
+
+  if (!email || !newPassword)
+    return res.status(400).json({ error: "Email and new password required" });
+
+  bcrypt.hash(newPassword, 10, (err, hashedPassword) => {
+    if (err) return res.status(500).json({ error: "Hash error" });
+
+    connection.query(
+      "UPDATE users SET password = ? WHERE email = ?",
+      [hashedPassword, email],
+      (err, result) => {
+        if (err) return res.status(500).json({ error: err.message });
+
+        if (result.affectedRows === 0)
+          return res.status(404).json({ error: "User not found" });
+
+        res.json({ success: true, message: "Password updated successfully" });
+      }
+    );
+  });
+});
+
 const PORT = process.env.PORT || 5000;
 
 app.listen(PORT, () => {
