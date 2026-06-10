@@ -49,6 +49,14 @@ app.get("/", (req, res) => {
   res.json({ message: "🚀 NexCommerce API running successfully" });
 });
 
+// ✅ CHECK ROUTE (Dashboard needs this)
+app.get("/check", authenticateToken, (req, res) => {
+  res.json({
+    success: true,
+    user: req.user
+  });
+});
+
 // ✅ Register
 app.post("/register", async (req, res) => {
   const { name, email, password } = req.body;
@@ -110,7 +118,7 @@ app.post("/login", (req, res) => {
       );
 
       res.json({
-        message: "✅ Login successful",
+        success: true,
         token,
         user: {
           id: user.id,
@@ -121,14 +129,6 @@ app.post("/login", (req, res) => {
       });
     }
   );
-});
-
-// ✅ Protected Route
-app.get("/me", authenticateToken, (req, res) => {
-  res.json({
-    message: "✅ Protected route accessed",
-    user: req.user
-  });
 });
 
 const PORT = process.env.PORT || 5000;
