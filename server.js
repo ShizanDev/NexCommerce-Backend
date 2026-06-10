@@ -161,3 +161,77 @@ const PORT = process.env.PORT || 5000;
 app.listen(PORT, () => {
   console.log(`🚀 Server running on port ${PORT}`);
 });
+
+
+// ✅ Create Stores Table
+app.get("/init-stores-table", (req, res) => {
+  const sql = `
+    CREATE TABLE IF NOT EXISTS stores (
+      id INT AUTO_INCREMENT PRIMARY KEY,
+      user_id INT NOT NULL,
+      store_name VARCHAR(255),
+      store_url VARCHAR(255),
+      api_key VARCHAR(255) UNIQUE,
+      created_at TIMESTAMP DEFAULT CURRENT_TIMESTAMP,
+      FOREIGN KEY (user_id) REFERENCES users(id) ON DELETE CASCADE
+    )
+  `;
+
+  connection.query(sql, (err) => {
+    if (err) {
+      return res.status(500).json({ error: err.message });
+    }
+    res.json({ success: true, message: "Stores table created successfully ✅" });
+  });
+});
+
+// ✅ Create Store API
+app.post("/create-store", authenticateToken, (req, res) => {
+  const { store_name, store_url } = req.body;
+
+  if (!store_name || !store_url) {
+    return res.status(400).json({ error: "Store name and URL required" });
+  }
+
+  const apiKey = "nc_" + Math.random().toString(36).substring(2) + Date.now();
+
+  const sql = `
+    INSERT INTO stores (user_id, store_name, store_url, api_key)
+    VALUES (?, ?, ?, ?)
+  `;
+
+  connection.query(
+    sql,
+    [req.user.id, store_name, store_url, apiKey],
+    (err, result) => {
+      if (err) {
+        return res.status(500).json({ error: err.message });
+      }
+
+      res.json({
+        success: true,
+        message: "Store created successfully ✅",
+        store: {
+          id: result.insertId,
+          store_name,
+          store_url,
+          api_key: apiKey,
+        },
+      });
+    }
+  );
+});
+
+// ✅ Get User Stores
+app.get("/stores", authenticateToken, (req, res) => {
+  const sql = "SELECT * FROM stores WHERE user_id = ?";
+
+  connection.query(sql, [req.user.id], (err, results) => {
+    if (err) return res.status(500).json({ error: err.message });
+
+    res.json({
+      success: true,
+      stores: results,
+    });
+  });
+});
