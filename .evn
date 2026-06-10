@@ -1,0 +1,2 @@
+DATABASE_URL=mysql://root:KiVzgEQiMcUzQCUmWqyeolQAqhoIEGPa@nozomi.proxy.rlwy.net:27572/railway
+PORT=5000
