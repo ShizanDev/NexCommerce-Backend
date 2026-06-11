@@ -131,6 +131,21 @@ app.post("/login", (req, res) => {
   );
 });
 
+// ✅ INIT ROLE SYSTEM
+app.get("/init-role-system", (req, res) => {
+  const sql = `
+    ALTER TABLE users
+    ADD COLUMN role VARCHAR(50) DEFAULT 'admin'
+  `;
+
+  connection.query(sql, (err) => {
+    if (err) {
+      return res.json({ message: "Role column may already exist ✅" });
+    }
+    res.json({ message: "Role column added ✅" });
+  });
+});
+
 // ✅ Forgot Password (Simple Reset)
 app.post("/forgot-password", (req, res) => {
   const { email, newPassword } = req.body;
